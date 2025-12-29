@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { navbarStyles } from "../assets/dummyStyles";
 import logo from "../assets/logo.png";
 import { BookMarked, BookOpen, Contact, Home, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useAuth, useClerk, UserButton, useUser } from "@clerk/clerk-react";
 
 const navItems = [
   { name: "Home", icon: Home, href: "/" },
@@ -13,6 +14,18 @@ const navItems = [
 ];
 
 const Navbar = () => {
+  // for clerk
+  const { openSignUp } = useClerk();
+  const { isSignedIn } = useUser();
+  const { getToken } = useAuth();
+
+  // for mobile toggle
+  const [isOpen, setIsOpen] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  const menuRef = useRef(null);
+  const isLoggedIn = isSignedIn && Boolean(localStorage.getItem("token"));
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
 
@@ -70,6 +83,23 @@ const Navbar = () => {
           </div>
 
           {/* Right Side */}
+          <div className={navbarStyles.authContainer}>
+            {!isSignedIn ? (
+              <button
+                type="button"
+                onClick={() => openSignUp({})}
+                className={
+                  navbarStyles.createAccountButton || navbarStyles.loginButton
+                }
+              >
+                <span>Create Account</span>
+              </button>
+            ) : (
+              <div className="flex items-center">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
