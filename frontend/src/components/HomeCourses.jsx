@@ -23,7 +23,9 @@ const HomeCourses = () => {
   useEffect(() => {
     try {
       localStorage.setItem("userCourseRatings", JSON.stringify(userRatings));
-    } catch {}
+    } catch {
+      console.log("");
+    }
   }, [userRatings]);
 
   const showLoginToast = () => {
