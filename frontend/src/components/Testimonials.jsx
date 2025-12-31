@@ -18,7 +18,7 @@ const Testimonials = () => {
     window.matchMedia("(pointer:fine)").matches;
 
   // Enhanced 3D tilt with parallax layers (no-op on small / touch devices)
-  const onMouseMove = (e, el, index) => {
+  const onMouseMove = (e, el) => {
     if (!el) return;
     if (!isPointerDevice()) return; // disable tilt on touch / coarse-pointer devices
 
