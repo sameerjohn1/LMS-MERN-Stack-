@@ -44,7 +44,7 @@ const HomeCourses = () => {
       showLoginToast();
       return;
     }
-    navigate(`/courses/${id}`);
+    navigate(`/course/${id}`);
   };
 
   const handleBrowseClick = () => {
