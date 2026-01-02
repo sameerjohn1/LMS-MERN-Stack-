@@ -8,6 +8,7 @@ import Courses from "./pages/Courses";
 import CourseDetailsPageHome from "./pages/CourseDetailsPageHome";
 import { ArrowUp } from "lucide-react";
 import CourseDetailsPage from "./pages/CourseDetailsPage";
+import CourseDetail from "./pages/CourseDetailsPageHome";
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();

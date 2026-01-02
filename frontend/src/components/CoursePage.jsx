@@ -97,7 +97,7 @@ const CoursePage = () => {
       showLoginToast();
       return;
     }
-    navigate(`courses/${courseId}`);
+    navigate(`/courses/${courseId}`);
   };
 
   const isCourseFree = (course) => {
