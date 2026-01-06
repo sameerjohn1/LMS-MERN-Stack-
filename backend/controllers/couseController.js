@@ -138,3 +138,28 @@ export const getPublicCourses = async (req, res) => {
     });
   }
 };
+
+// get Courses
+export const getCourses = async (req, res) => {
+  try {
+    const courses = await Course.find().sort({ createdAt: -1 });
+    const mapped = courses.map((c) => {
+      const imageUrl = makeImageAbsolute(c.image || "", req);
+      return {
+        ...c,
+        image: imageUrl,
+      };
+    });
+
+    return res.json({
+      success: true,
+      items: mapped,
+    });
+  } catch (err) {
+    console.error("GetCourses error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Server Error",
+    });
+  }
+};
