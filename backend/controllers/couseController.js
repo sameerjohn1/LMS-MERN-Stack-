@@ -142,7 +142,7 @@ export const getPublicCourses = async (req, res) => {
 // get Courses
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find().sort({ createdAt: -1 });
+    const courses = await Course.find().sort({ createdAt: -1 }).lean();
     const mapped = courses.map((c) => {
       const imageUrl = makeImageAbsolute(c.image || "", req);
       return {
@@ -155,6 +155,32 @@ export const getCourses = async (req, res) => {
       success: true,
       items: mapped,
     });
+  } catch (err) {
+    console.error("GetCourses error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Server Error",
+    });
+  }
+};
+
+// get course by id
+export const getCourseById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const course = await Course.findById(id).lean();
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        error: "Course not found",
+      });
+
+      course.image = makeImageAbsolute(course.image || "", req);
+      return res.json({
+        success: true,
+        course,
+      });
+    }
   } catch (err) {
     console.error("GetCourses error:", err);
     res.status(500).json({
