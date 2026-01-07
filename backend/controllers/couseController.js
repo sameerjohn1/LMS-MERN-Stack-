@@ -182,7 +182,96 @@ export const getCourseById = async (req, res) => {
       });
     }
   } catch (err) {
-    console.error("GetCourses error:", err);
+    console.error("GetCourseById error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Server Error",
+    });
+  }
+};
+
+// to create a course
+export const createCourse = async (req, res) => {
+  try {
+    //createCourse
+    const body = req.body || {};
+
+    // image handling: store relative path so static serving works consistently
+    const imagePath = req.file
+      ? `/uploads/${req.file.filename}`
+      : body.image || "";
+
+    // parse price
+    const priceParsed = parseJSONSafe(body.price) ?? (body.price || {});
+    const price = {
+      original: toNumber(priceParsed.original ?? body["price.original"] ?? 0),
+      sale: toNumber(priceParsed.sale ?? body["price.sale"] ?? 0),
+    };
+
+    // lectures
+    let lectures = parseJSONSafe(body.lectures) ?? body.lectures ?? [];
+    if (!Array.isArray(lectures)) lectures = [];
+
+    // normalize lectures & chapters
+    lectures = lectures.map((lec) => {
+      const lecture = { ...lec };
+      lecture.duration = lecture.duration || {};
+      lecture.duration.hours = toNumber(lecture.duration.hours);
+      lecture.duration.minutes = toNumber(lecture.duration.minutes);
+
+      lecture.chapters = Array.isArray(lecture.chapters)
+        ? lecture.chapters
+        : [];
+      lecture.chapters = lecture.chapters.map((ch) => ({
+        ...ch,
+        duration: {
+          hours: toNumber(ch.duration?.hours),
+          minutes: toNumber(ch.duration?.minutes),
+        },
+        totalMinutes: toNumber(ch.totalMinutes, 0),
+        videoUrl: ch.videoUrl || "",
+        name: ch.name || "",
+        topic: ch.topic || "",
+      }));
+
+      return {
+        ...lecture,
+        title: lecture.title || "Untitled lecture",
+        totalMinutes: toNumber(lecture.totalMinutes, 0),
+      };
+    });
+
+    const courseObj = {
+      name: body.name || "",
+      teacher: body.teacher || "",
+      image: imagePath,
+      rating: toNumber(body.rating, 0),
+      pricingType: body.pricingType || "free",
+      price,
+      overview: body.overview || body.description || "",
+      totalDuration: parseJSONSafe(body.totalDuration) ?? {
+        hours: toNumber(body["totalDuration.hours"]),
+        minutes: toNumber(body["totalDuration.minutes"]),
+      },
+      totalLectures: toNumber(body.totalLectures, lectures.length),
+      lectures,
+      courseType: body.courseType || "regular",
+      category: body.category || null,
+      createdBy: body.createdBy || null,
+    };
+
+    computeDerivedFields(courseObj);
+    const course = new Course(courseObj);
+    await course.save();
+
+    const returned = course.toObject();
+    returned.image = makeImageAbsolute(returned.image || "", req);
+    return res.status(201).json({
+      success: true,
+      course: returned,
+    });
+  } catch (err) {
+    console.error("CreateCourse error:", err);
     res.status(500).json({
       success: false,
       error: "Server Error",
